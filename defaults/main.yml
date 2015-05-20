@@ -1,0 +1,62 @@
+---
+
+# defaults file for haproxy
+
+haproxy_path_compiled_config: '/etc/haproxy/compiled'
+
+haproxy_global:
+  log:
+    - address: /dev/log
+      facility: local0
+    - address: /dev/log
+      facility: local1
+      level: notice
+  chroot: /var/lib/haproxy
+  pidfile: /var/run/haproxy.pid
+  maxconn: '2048'
+  stats:
+    socket: /run/haproxy/admin.sock mode 660 level admin
+    timeout: 30s
+  user: haproxy
+  group: haproxy
+  daemon: true
+  custom_param:
+    - param: 'tune.ssl.default-dh-param'
+      value: '4096'
+    - param: 'ssl-default-bind-ciphers'
+      value: 'EECDH+ECDSA+AESGCM:EECDH+aRSA+AESGCM:EECDH+ECDSA+SHA384:EECDH+ECDSA+SHA256:EECDH+aRSA+SHA384:EECDH+aRSA+SHA256:EECDH+aRSA+RC4:EECDH:EDH+aRSA:!aNULL:!eNULL:!LOW:!3DES:!MD5:!EXP:!PSK:!SRP:!DSS:!RC4'
+    - param: 'ssl-default-bind-options'
+      value: 'no-sslv3'
+
+haproxy_defaults:
+  mode: http
+  log:
+    - address: global
+      format: '%ci:%cp\ [%t]\ %ft\ %b/%s\ %Tq/%Tw/%Tc/%Tr/%Tt\ %sslv/%sslc\ %ST\ %B\ %CC\ %CS\ %tsc\ %ac/%fc/%bc/%sc/%rc\ %sq/%bq\ %hr\ %hs\ %{+Q}r'
+  timeout:
+      - param: 'connect'
+        value: '5000ms'
+      - param: 'client'
+        value: '50000ms'
+      - param: 'server'
+        value: '50000ms'
+  options:
+    - httplog
+    - dontlognull
+    - forwardfor
+    - http-server-close
+  errorfile:
+      - code: 400
+        file: /etc/haproxy/errors/400.http
+      - code: 403
+        file: /etc/haproxy/errors/403.http
+      - code: 408
+        file: /etc/haproxy/errors/408.http
+      - code: 500
+        file: /etc/haproxy/errors/500.http
+      - code: 502
+        file: /etc/haproxy/errors/502.http
+      - code: 503
+        file: /etc/haproxy/errors/503.http
+      - code: 504
+        file: /etc/haproxy/errors/504.http

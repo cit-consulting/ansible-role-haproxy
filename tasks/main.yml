@@ -1,50 +1,248 @@
 ---
 
+- name: "Add vbernat repository"
+  apt_repository:
+    repo: 'ppa:vbernat/haproxy-1.5'
+    state: present
+  when: "ansible_os_family == 'Debian'"
+  tags:
+    - haproxy
+
 - name: "Install haproxy 'Debian'"
   apt:
-    pkg: "haproxy"
-    state: present
+    pkg: 'haproxy'
+    state: latest
   when: "ansible_os_family == 'Debian'"
   tags:
     - haproxy
 
 - name: "Install haproxy 'RedHat'"
   yum:
-    name: "haproxy"
-    state: present
+    name: 'haproxy'
+    state: latest
   when: "ansible_os_family == 'RedHat'"
   tags:
     - haproxy
 
-- name: Upload haproxy.cfg
-  template:
-    src: "haproxy.conf.j2"
-    dest: "/etc/haproxy/haproxy.cfg"
-    backup: no
-    owner: "root"
-    group: "root"
-    mode: 0644
-  notify:
-    - restart haproxy
-  tags:
-    - haproxy
+#- name: "Upload haproxy.cfg"
+#  template:
+#    src: 'haproxy.conf.j2'
+#    dest: '/etc/haproxy/haproxy.cfg'
+#    backup: no
+#    owner: 'root'
+#    group: 'root'
+#    mode: 0644
+#  notify:
+#    - restart haproxy
+#  tags:
+#    - haproxy
 
-- name: Install state haproxy "ENABLED=1" to init script
+- name: "Install state haproxy 'ENABLED=1' to init script"
   lineinfile:
-    dest: "/etc/default/haproxy"
+    dest: '/etc/default/haproxy'
     state: present
-    regexp: "^#?ENABLED"
-    line: "ENABLED=1"
+    regexp: '^#?ENABLED'
+    line: 'ENABLED=1'
   notify:
     - restart haproxy
   when: "ansible_os_family == 'Debian'"
   tags:
     - haproxy
 
-#- name: "Register and start service haproxy"
-#  service:
-#    name: "haproxy"
-#    enabled: yes
-#    state: started
-#  tags:
-#    - haproxy
+- name: "Upload haproxy certificates"
+  sudo: yes
+  copy:
+    src: '{{ item }}'
+    dest: '/etc/ssl/private'
+  with_fileglob: '../haproxy-key/*'
+
+## ASSEMBLE CONFIG - FRONTEND
+
+- name: "Create directory for the frontend"
+  file:
+    path: '/etc/haproxy/frontends.d'
+    state: directory
+  tags:
+    - haproxy
+    - config
+
+- name: "Empty the folder if not already empty"
+  command: find /etc/haproxy/frontends.d -name *.cfg -exec rm -f {} \;
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the frontends"
+  template:
+    src: 'frontend.cfg'
+    dest: '/etc/haproxy/frontends.d/{{ item.name }}.cfg'
+  with_items: haproxy_frontends
+  when: haproxy_frontends is defined
+  tags:
+    - haproxy
+    - config
+
+## ASSEMBLE CONFIG - BACKEND
+
+- name: "Create directory for the backends"
+  file:
+    path: '/etc/haproxy/backends.d'
+    state: directory
+  tags:
+    - haproxy
+    - config
+
+- name: "Empty the folder if not already empty"
+  command: find /etc/haproxy/backends.d -name *.cfg -exec rm -f {} \;
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the backends"
+  template:
+    src: 'backend.cfg'
+    dest: '/etc/haproxy/backends.d/{{ item.name }}.cfg'
+  with_items: haproxy_backends
+  when: haproxy_backends is defined
+  tags:
+    - haproxy
+    - config
+
+## ASSEMBLE CONFIG - LISTEN
+
+- name: "Create directory for the listen sections"
+  file:
+    path: '/etc/haproxy/listen.d'
+    state: directory
+  tags:
+    - haproxy
+    - config
+
+- name: "Empty the folder if not already empty"
+  command: find /etc/haproxy/listen.d -name *.cfg -exec rm -f {} \;
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the listen sections"
+  template:
+    src: 'listen.cfg'
+    dest: '/etc/haproxy/listen.d/{{ item.name }}.cfg'
+  with_items: haproxy_listen
+  when: haproxy_listen is defined
+  tags:
+    - haproxy
+    - config
+
+## ASSEMBLE CONFIG - USERLIST
+
+- name: "Create directory for the userlists"
+  file:
+    path: '/etc/haproxy/userlists.d'
+    state: directory
+  tags:
+    - haproxy
+    - config
+
+- name: "Empty the folder if not already empty"
+  command: find /etc/haproxy/userlists.d -name *.cfg -exec rm -f {} \;
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the userlist sections"
+  template:
+    src: 'userlist.cfg'
+    dest: '/etc/haproxy/userlists.d/{{ item.name }}.cfg'
+  with_items: haproxy_userlists
+  when: haproxy_userlists is defined
+  tags:
+    - haproxy
+    - config
+
+## ASSEMBLE CONFIG - GLOBAL & DEFAULT
+
+- name: "Create  the compiled folder"
+  file:
+    path: '{{ haproxy_path_compiled_config }}'
+    state: directory
+  tags:
+    - haproxy
+    - config
+
+- name: "Empty the folder if not already empty"
+  command: find {{ haproxy_path_compiled_config }} -name *.cfg -exec rm -f {} \;
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the global config"
+  template:
+    src: 'global.cfg'
+    dest: '{{ haproxy_path_compiled_config }}/01-global.cfg'
+  when: haproxy_global is defined
+  tags:
+    - haproxy
+    - config
+
+- name: "Build up the default config"
+  template:
+    src: 'defaults.cfg'
+    dest: '{{ haproxy_path_compiled_config }}/02-defaults.cfg'
+  when: haproxy_defaults is defined
+  tags:
+    - haproxy
+    - config
+
+## ASSEMBLE FINAL CONFIG
+
+- name: "Assemble the backends configuration file"
+  assemble:
+    src: '/etc/haproxy/backends.d'
+    dest: '{{ haproxy_path_compiled_config }}/03-backends.cfg'
+  tags:
+    - haproxy
+    - config
+
+- name: "Assemble the frontends configuration file"
+  assemble:
+    src: '/etc/haproxy/frontends.d'
+    dest: '{{ haproxy_path_compiled_config }}/04-frontends.cfg'
+  tags:
+    - haproxy
+    - config
+
+- name: "Assemble the listen sections configuration file"
+  assemble:
+    src: '/etc/haproxy/listen.d'
+    dest: '{{ haproxy_path_compiled_config }}/05-listen.cfg'
+  tags:
+    - haproxy
+    - config
+
+- name: "Assemble the userlists sections configuration file"
+  assemble:
+    src: '/etc/haproxy/userlists.d'
+    dest: '{{ haproxy_path_compiled_config }}/06-userlists.cfg'
+  tags:
+    - haproxy
+    - config
+
+- name: "Assemble the final configuration file"
+  assemble:
+    src: '{{ haproxy_path_compiled_config }}'
+    dest: '/etc/haproxy/haproxy.cfg'
+    backup: yes
+  notify: restart haproxy
+  tags:
+    - haproxy
+    - config
+
+- name: "Register and start service haproxy"
+  service:
+    name: 'haproxy'
+    enabled: yes
+    state: started
+  tags:
+    - haproxy
+    - config
