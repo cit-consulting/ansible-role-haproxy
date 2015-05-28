@@ -4,8 +4,6 @@
 
 haproxy_path_compiled_config: '/etc/haproxy/compiled'
 
-path_to_haproxy_ssl_key: '../haproxy-key'
-
 haproxy_global:
   log:
     - address: /dev/log

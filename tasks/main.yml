@@ -36,13 +36,6 @@
   tags:
     - haproxy
 
-- name: "Upload haproxy certificates"
-  sudo: yes
-  copy:
-    src: '{{ item }}'
-    dest: '/etc/ssl/private'
-  with_fileglob: '{{ path_to_haproxy_ssl_key }}/*'
-
 ## ASSEMBLE CONFIG - FRONTEND
 
 - name: "Create directory for the frontend"
