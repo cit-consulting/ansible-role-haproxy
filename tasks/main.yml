@@ -24,19 +24,6 @@
   tags:
     - haproxy
 
-#- name: "Upload haproxy.cfg"
-#  template:
-#    src: 'haproxy.conf.j2'
-#    dest: '/etc/haproxy/haproxy.cfg'
-#    backup: no
-#    owner: 'root'
-#    group: 'root'
-#    mode: 0644
-#  notify:
-#    - restart haproxy
-#  tags:
-#    - haproxy
-
 - name: "Install state haproxy 'ENABLED=1' to init script"
   lineinfile:
     dest: '/etc/default/haproxy'
@@ -54,7 +41,7 @@
   copy:
     src: '{{ item }}'
     dest: '/etc/ssl/private'
-  with_fileglob: '../haproxy-key/*'
+  with_fileglob: '{{ path_to_haproxy_ssl_key }}/*'
 
 ## ASSEMBLE CONFIG - FRONTEND
 
