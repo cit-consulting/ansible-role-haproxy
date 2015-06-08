@@ -92,6 +92,10 @@ empty: true
 #    acl:
 #      - name:
 #        condition:
+#    reqrep:
+#      - condition:
+#    rspirep:
+#      - condition:
 #    servers:
 #      - name:
 #        ip:
