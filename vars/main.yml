@@ -73,6 +73,10 @@ empty: true
 #        -
 #    options:
 #        - forwardfor
+#    compression:
+#      algo:
+#      type:
+#      offload:
 #    default_backend:
 #    use_backend:
 #      - name:
@@ -105,6 +109,10 @@ empty: true
 #              - param1
 #    options:
 #        - forwardfor
+#    compression:
+#      algo:
+#      type:
+#      offload:
 #
 #haproxy_listen:
 #  - name:
