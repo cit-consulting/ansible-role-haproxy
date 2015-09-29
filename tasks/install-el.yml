@@ -1,0 +1,67 @@
+---
+
+#- name: "Install haproxy 'RedHat'"
+#  yum:
+#    name: 'haproxy'
+#    state: latest
+#  when: "ansible_os_family == 'RedHat'"
+#  tags:
+#    - haproxy
+
+# Install hyperic-agent
+
+- name: "Dowload haproxy distribution"
+  local_action:  get_url url={{ haproxy_downoal_url }} dest=tmp/{{ haproxy_distr_name }}
+  sudo: no
+  when: haproxy_downoal_url is defined
+  run_once: true
+  changed_when: false
+  sudo: no
+  tags:
+    - haproxy
+
+- name: "Upload haproxy distribution on target host"
+  copy:
+    src: 'tmp/{{ haproxy_distr_name }}'
+    dest: '{{ haproxy_upload_url }}/{{ haproxy_distr_name }}'
+  sudo: yes
+  tags:
+    - haproxy
+
+- name: "Install haproxy"
+  yum:
+    name: '{{ haproxy_upload_url }}/{{ haproxy_distr_name }}'
+    state: present
+  sudo: yes
+  tags:
+    - haproxy
+
+- name: "Create haproxy.conf to rsyslog.d"
+  template:
+    src: 'haproxy.conf.j2'
+    dest: '/etc/rsyslog.d/haproxy.conf'
+    owner: 'root'
+    group: 'root'
+    mode: '0644'
+  notify:
+    - restart rsyslog
+  tags:
+    - haproxy
+
+- name: "Apply log configuration values"
+  lineinfile:
+    dest: "{{ item.0.file }}"
+    regexp: "(.*){{ item.1.prop }}"
+    line: "{{ item.1.value }}"
+    owner: "root"
+    group: "root"
+    state: present
+    mode: 0644
+    create: yes
+  with_subelements:
+    - haproxy_log_configuration
+    - params
+  notify:
+    - restart rsyslog
+  tags:
+    - haproxy

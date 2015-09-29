@@ -1,0 +1,26 @@
+---
+
+- name: "Add vbernat repository"
+  apt_repository:
+    repo: 'ppa:vbernat/haproxy-1.5'
+    state: present
+  tags:
+    - haproxy
+
+- name: "Install haproxy 'Debian'"
+  apt:
+    pkg: 'haproxy'
+    state: latest
+  tags:
+    - haproxy
+
+- name: "Install state haproxy 'ENABLED=1' to init script"
+  lineinfile:
+    dest: '/etc/default/haproxy'
+    state: present
+    regexp: '^#?ENABLED'
+    line: 'ENABLED=1'
+  notify:
+    - restart haproxy
+  tags:
+    - haproxy

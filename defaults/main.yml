@@ -4,6 +4,13 @@
 
 haproxy_path_compiled_config: '/etc/haproxy/compiled'
 
+haproxy_downoal_url: 'ftp://10.192.0.50/Public/distr/HaProxy/{{ haproxy_distr_name }}'
+
+haproxy_distr_name: 'haproxy-1.5.4-2.el6.x86_64.rpm'
+
+haproxy_upload_url: '/tmp'
+
+
 haproxy_global:
   log:
     - address: /dev/log
@@ -59,3 +66,11 @@ haproxy_defaults:
         file: /etc/haproxy/errors/503.http
       - code: 504
         file: /etc/haproxy/errors/504.http
+
+haproxy_log_configuration:
+  - file: "/etc/rsyslog.conf"
+    params:
+      - { prop: "ModLoad imudp", value: "$ModLoad imudp" }
+  - file: "/etc/rsyslog.conf"
+    params:
+      - { prop: "UDPServerRun 514", value: "$UDPServerRun 514" }
