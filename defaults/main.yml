@@ -8,8 +8,9 @@ haproxy_downoal_url: 'ftp://10.192.0.50/Public/distr/HaProxy/{{ haproxy_distr_na
 
 haproxy_distr_name: 'haproxy-1.5.4-2.el6.x86_64.rpm'
 
-haproxy_upload_url: '/tmp'
+haproxy_service_enabled: 'yes'
 
+haproxy_upload_url: '/tmp'
 
 haproxy_global:
   log:
