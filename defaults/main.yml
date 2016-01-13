@@ -52,6 +52,7 @@ haproxy_defaults:
     - dontlognull
     - forwardfor
     - http-server-close
+    - redispatch
   errorfile:
       - code: 400
         file: /etc/haproxy/errors/400.http
