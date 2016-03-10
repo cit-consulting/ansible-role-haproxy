@@ -200,7 +200,7 @@
 - name: "Register service haproxy"
   service:
     name: 'haproxy'
-    enabled: "{{haproxy_service_enabled}}"
+    enabled: "{{ haproxy_service_enabled }}"
   tags:
     - haproxy
     - config

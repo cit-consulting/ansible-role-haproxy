@@ -76,3 +76,5 @@ haproxy_log_configuration:
   - file: "/etc/rsyslog.conf"
     params:
       - { prop: "UDPServerRun 514", value: "$UDPServerRun 514" }
+
+haproxy_force_restart_on_cfg_change: 'reloaded' # must be reloaded or restarted
