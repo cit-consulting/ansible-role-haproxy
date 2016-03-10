@@ -40,7 +40,7 @@ haproxy_defaults:
   mode: http
   log:
     - address: global
-      format: '%ci:%cp\ [%t]\ %ft\ %b/%s\ %Tq/%Tw/%Tc/%Tr/%Tt\ %ST\ %B\ %CC\ %CS\ %tsc\ %ac/%fc/%bc/%sc/%rc\ %sq/%bq\ %hr\ %hs\ %{+Q}r\ %[ssl_fc_protocol]:%[ssl_c_version]:%[ssl_fc_cipher]:%[ssl_fc_sni]:%[ssl_c_verify]:%[ssl_c_s_dn(CN)]:%[ssl_c_i_dn(CN)]:%[ssl_f_i_dn(CN)]:%[ssl_f_s_dn(CN)]'
+      format: '%ci:%cp\ [%t]\ %ft\ %b/%s\ %Tq/%Tw/%Tc/%Tr/%Tt\ %ST\ %B\ %CC\ %CS\ %tsc\ %ac/%fc/%bc/%sc/%rc\ %sq/%bq\ %hr\ %hs\ %{+Q}r' #\ %[ssl_fc_protocol]:%[ssl_c_version]:%[ssl_fc_cipher]:%[ssl_fc_sni]:%[ssl_c_verify]:%[ssl_c_s_dn(CN)]:%[ssl_c_i_dn(CN)]:%[ssl_f_i_dn(CN)]:%[ssl_f_s_dn(CN)]'
   timeout:
       - param: 'connect'
         value: '5000ms'
