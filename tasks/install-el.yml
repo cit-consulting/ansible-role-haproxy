@@ -59,7 +59,7 @@
     mode: 0644
     create: yes
   with_subelements:
-    - haproxy_log_configuration
+    - '{{ haproxy_log_configuration }}'
     - params
   notify:
     - restart rsyslog
