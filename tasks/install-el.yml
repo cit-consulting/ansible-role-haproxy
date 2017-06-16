@@ -12,11 +12,10 @@
 
 - name: "Dowload haproxy distribution"
   local_action:  get_url url={{ haproxy_downoal_url }} dest=tmp/{{ haproxy_distr_name }}
-  sudo: no
   when: haproxy_downoal_url is defined
   run_once: true
   changed_when: false
-  sudo: no
+  become: no
   tags:
     - haproxy
 
@@ -24,7 +23,7 @@
   copy:
     src: 'tmp/{{ haproxy_distr_name }}'
     dest: '{{ haproxy_upload_url }}/{{ haproxy_distr_name }}'
-  sudo: yes
+  become: yes
   tags:
     - haproxy
 
@@ -32,7 +31,7 @@
   yum:
     name: '{{ haproxy_upload_url }}/{{ haproxy_distr_name }}'
     state: present
-  sudo: yes
+  become: yes
   tags:
     - haproxy
 
