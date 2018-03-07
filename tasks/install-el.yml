@@ -37,8 +37,8 @@
 
 - name: "Create haproxy.conf to rsyslog.d"
   template:
-    src: 'haproxy.conf.j2'
-    dest: '/etc/rsyslog.d/haproxy.conf'
+    src: '49-haproxy.conf.j2'
+    dest: '/etc/rsyslog.d/49-haproxy.conf'
     owner: 'root'
     group: 'root'
     mode: '0644'

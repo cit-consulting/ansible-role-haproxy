@@ -78,3 +78,8 @@ haproxy_log_configuration:
       - { prop: "UDPServerRun 514", value: "$UDPServerRun 514" }
 
 haproxy_force_restart_on_cfg_change: 'reloaded' # must be reloaded or restarted
+
+# Defines if logs should be sent to remote syslog server
+haproxy_enable_remote_syslog: false
+haproxy_syslog_remote_host: 'localhost'
+haproxy_syslog_remote_port: '514'
